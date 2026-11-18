@@ -2,11 +2,42 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title> Sales Dashboard</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Sales Dashboard</title>
+
+  <!-- Thư viện đọc file Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
+    :root {
+      --primary: #6d28d9;
+      --primary-dark: #3b0764;
+      --primary-light: #ede9fe;
+
+      --green: #059669;
+      --green-light: #d1fae5;
+
+      --red: #dc2626;
+      --red-light: #fee2e2;
+
+      --orange: #d97706;
+      --orange-light: #fef3c7;
+
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+
+      --text: #172033;
+      --muted: #667085;
+      --border: #e4e7ec;
+      --background: #f5f7fb;
+      --white: #ffffff;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,91 +45,329 @@
     }
 
     body {
+      min-width: 320px;
+      min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f5f7fb;
-      color: #1f2937;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     .app {
       min-height: 100vh;
     }
 
-    /* HEADER */
+    /* =========================
+       HEADER
+    ========================= */
+
     .header {
-      background: linear-gradient(135deg, #111827, #312e81);
+      padding: 28px 32px;
       color: white;
-      padding: 26px 32px;
+      background: linear-gradient(
+        135deg,
+        #111827 0%,
+        #312e81 55%,
+        #6d28d9 100%
+      );
     }
 
-    .header-content {
-      max-width: 1400px;
-      margin: auto;
+    .header-inner {
+      width: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
+
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 20px;
       flex-wrap: wrap;
     }
 
     .header h1 {
-      font-size: 28px;
-      margin-bottom: 6px;
+      font-size: 34px;
+      line-height: 1.15;
+      margin-bottom: 8px;
     }
 
-    .header p {
-      color: #c7d2fe;
+    .header-description {
       font-size: 14px;
+      color: #ddd6fe;
     }
 
-    .badge {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-size: 13px;
+    .date-badge {
+      padding: 12px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+
+      font-size: 14px;
+      font-weight: 700;
     }
 
-    /* MAIN */
+    /* =========================
+       CONTAINER
+    ========================= */
+
     .container {
-      max-width: 1400px;
-      margin: auto;
+      width: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
       padding: 28px;
     }
 
-    /* FILTER */
-    .filter-bar {
-      background: white;
-      padding: 16px;
-      border-radius: 16px;
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(228, 231, 236, 0.7);
+      border-radius: 18px;
+
+      box-shadow:
+        0 8px 24px rgba(16, 24, 40, 0.05);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .section-description {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       UPLOAD FILE
+    ========================= */
+
+    .upload-card {
+      padding: 22px;
       margin-bottom: 22px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+    }
+
+    .upload-heading {
       display: flex;
-      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
       flex-wrap: wrap;
-      align-items: center;
+      margin-bottom: 18px;
     }
 
-    select, button {
-      padding: 10px 14px;
-      border-radius: 9px;
-      border: 1px solid #d1d5db;
-      background: white;
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .upload-box {
+      position: relative;
+
+      min-height: 148px;
+      padding: 18px;
+
+      border: 2px dashed #d8b4fe;
+      border-radius: 14px;
+      background: #faf7ff;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .upload-box.loaded {
+      border-color: #34d399;
+      background: #ecfdf5;
+    }
+
+    .upload-title {
       font-size: 14px;
+      font-weight: 800;
     }
 
-    button {
-      background: #4f46e5;
-      color: white;
+    .upload-help {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .file-input {
+      width: 100%;
+      padding: 9px;
+
+      border: 1px solid #d0d5dd;
+      border-radius: 9px;
+      background: white;
+
+      font-size: 12px;
+    }
+
+    .file-status {
+      min-height: 18px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .file-status.success {
+      color: var(--green);
+    }
+
+    .file-status.error {
+      color: var(--red);
+    }
+
+    .upload-actions {
+      margin-top: 16px;
+
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 10px 17px;
+
       border: none;
-      cursor: pointer;
-      font-weight: bold;
+      border-radius: 10px;
+
+      font-weight: 800;
+      transition: 0.2s;
     }
 
-    button:hover {
-      background: #4338ca;
+    .btn-primary {
+      color: white;
+      background: var(--primary);
     }
 
-    /* KPI */
+    .btn-primary:hover {
+      background: #5b21b6;
+    }
+
+    .btn-secondary {
+      color: #344054;
+      background: #f2f4f7;
+    }
+
+    .btn-secondary:hover {
+      background: #e4e7ec;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .global-status {
+      flex: 1;
+      min-width: 220px;
+
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .global-status.success {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .global-status.error {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    /* =========================
+       FILTER
+    ========================= */
+
+    .filter-card {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    .filter-header {
+      margin-bottom: 16px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns:
+        minmax(160px, 0.75fr)
+        minmax(190px, 1fr)
+        minmax(240px, 1.5fr)
+        auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+
+      color: #344054;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+      outline: none;
+
+      background: white;
+      color: var(--text);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+    }
+
+    .weekday-text {
+      min-height: 18px;
+      margin-top: 6px;
+
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* =========================
+       KPI
+    ========================= */
+
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -106,223 +375,328 @@
       margin-bottom: 22px;
     }
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+    .kpi-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 158px;
+      padding: 22px;
     }
 
-    .kpi-title {
-      color: #6b7280;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 10px;
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      right: -26px;
+      top: -28px;
+
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+
+      background: rgba(109, 40, 217, 0.06);
+    }
+
+    .kpi-label {
+      position: relative;
+      z-index: 1;
+
+      margin-bottom: 15px;
+
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
     }
 
     .kpi-value {
-      font-size: 27px;
-      font-weight: 800;
+      position: relative;
+      z-index: 1;
+
       margin-bottom: 8px;
+
+      font-size: 32px;
+      line-height: 1.1;
+      font-weight: 900;
     }
 
-    .green {
-      color: #059669;
+    .kpi-note {
+      position: relative;
+      z-index: 1;
+
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .purple {
+      color: var(--primary);
     }
 
     .red {
-      color: #dc2626;
-    }
-
-    .blue {
-      color: #4f46e5;
+      color: var(--red);
     }
 
     .orange {
-      color: #d97706;
+      color: var(--orange);
     }
 
-    .small {
-      font-size: 12px;
-      color: #6b7280;
+    .green {
+      color: var(--green);
     }
 
-    /* CHART AREA */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 18px;
+    /* =========================
+       SUMMARY
+    ========================= */
+
+    .summary-card {
+      padding: 18px 22px;
       margin-bottom: 22px;
-    }
 
-    .section-title {
-      font-size: 16px;
-      font-weight: 800;
-      margin-bottom: 20px;
-    }
-
-    /* CSS BAR CHART */
-    .chart {
-      height: 280px;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
+      justify-content: space-between;
       gap: 18px;
-      padding-top: 20px;
-      border-bottom: 1px solid #e5e7eb;
+      flex-wrap: wrap;
     }
 
-    .bar-group {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 5px;
-      position: relative;
-      padding-bottom: 30px;
+    .summary-text {
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .bar {
-      width: 26px;
-      border-radius: 7px 7px 0 0;
-      transition: 0.3s;
-    }
-
-    .bar:hover {
-      opacity: 0.75;
-    }
-
-    .target {
-      background: #c7d2fe;
-    }
-
-    .actual {
-      background: #4f46e5;
-    }
-
-    .month {
-      position: absolute;
-      bottom: 5px;
-      font-size: 11px;
-      color: #6b7280;
+    .summary-text strong {
+      color: var(--text);
     }
 
     .legend {
       display: flex;
-      gap: 18px;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+
       font-size: 12px;
-      color: #6b7280;
-      margin-top: 15px;
+      color: var(--muted);
     }
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      display: inline-block;
-      border-radius: 3px;
-      margin-right: 5px;
-    }
-
-    /* PROGRESS */
-    .progress-item {
-      margin-bottom: 20px;
-    }
-
-    .progress-row {
+    .legend-item {
       display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 7px;
+      align-items: center;
+      gap: 6px;
     }
 
-    .progress-bg {
+    .legend-dot {
+      width: 9px;
       height: 9px;
-      background: #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
+      border-radius: 50%;
     }
 
-    .progress {
-      height: 100%;
-      border-radius: 10px;
-    }
+    /* =========================
+       TABLE
+    ========================= */
 
-    /* TABLE */
     .table-card {
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+
+    .table-heading {
+      padding: 22px;
+
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-count {
+      padding: 7px 11px;
+      border-radius: 50px;
+
+      color: #5b21b6;
+      background: var(--primary-light);
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .table-wrapper {
+      width: 100%;
       overflow-x: auto;
     }
 
     table {
       width: 100%;
+      min-width: 950px;
       border-collapse: collapse;
     }
 
     th {
+      padding: 14px 16px;
+
       background: #f9fafb;
-      color: #6b7280;
-      font-size: 12px;
+      color: #475467;
+
+      font-size: 11px;
+      font-weight: 900;
       text-align: left;
-      padding: 13px;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
     td {
-      padding: 14px 13px;
-      border-top: 1px solid #edf0f5;
+      padding: 15px 16px;
+
+      border-top: 1px solid #eef0f3;
+
       font-size: 13px;
+      vertical-align: middle;
     }
 
-    .status {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 20px;
+    tbody tr:hover {
+      background: #faf7ff;
+    }
+
+    .store-code {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .store-name {
+      max-width: 300px;
+      font-weight: 700;
+    }
+
+    .money {
+      color: var(--orange);
+      font-weight: 900;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      padding: 6px 10px;
+      border-radius: 50px;
+
       font-size: 11px;
-      font-weight: bold;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
-    .good {
-      background: #d1fae5;
+    .status-covered {
       color: #047857;
+      background: var(--green-light);
     }
 
-    .warning {
-      background: #fef3c7;
-      color: #b45309;
-    }
-
-    .risk {
-      background: #fee2e2;
+    .status-not-covered {
       color: #b91c1c;
+      background: var(--red-light);
     }
 
-    /* FOOTER */
-    .footer {
+    .status-unknown {
+      color: #475467;
+      background: #f2f4f7;
+    }
+
+    .empty-state {
+      padding: 56px 20px;
       text-align: center;
-      color: #9ca3af;
-      font-size: 11px;
-      padding: 30px;
     }
 
-    @media(max-width: 900px) {
-      .kpi-grid {
+    .empty-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 16px;
+      background: var(--primary-light);
+
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .empty-title {
+      margin-bottom: 7px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .empty-description {
+      max-width: 540px;
+      margin: 0 auto;
+
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      padding: 18px 20px 30px;
+
+      color: #98a2b3;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 1100px) {
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-grid {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .main-grid {
-        grid-template-columns: 1fr;
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    @media(max-width: 520px) {
+    @media (max-width: 650px) {
+      .header {
+        padding: 24px 18px;
+      }
+
+      .header h1 {
+        font-size: 28px;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      .filter-grid,
       .kpi-grid {
         grid-template-columns: 1fr;
       }
 
-      .container {
-        padding: 15px;
+      .filter-actions {
+        width: 100%;
       }
 
-      .header {
-        padding: 22px 16px;
+      .filter-actions .btn {
+        flex: 1;
+      }
+
+      .kpi-card {
+        min-height: 135px;
+      }
+
+      .summary-card {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
@@ -330,307 +704,166 @@
 
 <body>
 
-<div class="app">
+  <div class="app">
 
-  <div class="header">
-    <div class="header-content">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-inner">
 
-      <div>
-        <h1>HCME Sales Dashboard</h1>
-        <p>Ho Chi Minh East | Sales Performance Overview</p>
-      </div>
+        <div>
+          <h1>Sales Dashboard</h1>
 
-      <div class="badge">
-        November Performance
-      </div>
-
-    </div>
-  </div>
-
-
-  <div class="container">
-
-    <!-- FILTER -->
-
-    <div class="filter-bar">
-
-      <strong>Filters</strong>
-
-      <select id="monthFilter">
-        <option>November</option>
-        <option>October</option>
-        <option>September</option>
-      </select>
-
-      <select id="areaFilter">
-        <option>All HCME</option>
-        <option>Thu Duc</option>
-        <option>District 2</option>
-        <option>District 9</option>
-        <option>Long Khanh</option>
-      </select>
-
-      <button onclick="refreshDashboard()">
-        Update Dashboard
-      </button>
-
-    </div>
-
-
-    <!-- KPI -->
-
-    <div class="kpi-grid">
-
-      <div class="card">
-        <div class="kpi-title">TOTAL SALES</div>
-        <div class="kpi-value">12.8B</div>
-        <div class="small">
-          <span class="green">▲ 8.4%</span> vs last month
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="kpi-title">TARGET ACHIEVEMENT</div>
-        <div class="kpi-value blue">96.3%</div>
-        <div class="small">
-          Target: 13.3B
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="kpi-title">ACTIVE OUTLETS</div>
-        <div class="kpi-value">1,428</div>
-        <div class="small">
-          <span class="green">▲ 46 outlets</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="kpi-title">PRODUCTIVITY</div>
-        <div class="kpi-value orange">89.7%</div>
-        <div class="small">
-          Productive visits / total visits
-        </div>
-      </div>
-
-    </div>
-
-
-    <!-- MAIN -->
-
-    <div class="main-grid">
-
-      <!-- SALES TREND -->
-
-      <div class="card">
-
-        <div class="section-title">
-          Sales Trend | Target vs Actual
+          <div class="header-description">
+            Tracking PJP, bao phủ Knorr và số tiền cần bán
+          </div>
         </div>
 
-        <div class="chart">
-
-          <div class="bar-group">
-            <div class="bar target" style="height:65%"></div>
-            <div class="bar actual" style="height:61%"></div>
-            <div class="month">Jun</div>
-          </div>
-
-          <div class="bar-group">
-            <div class="bar target" style="height:68%"></div>
-            <div class="bar actual" style="height:66%"></div>
-            <div class="month">Jul</div>
-          </div>
-
-          <div class="bar-group">
-            <div class="bar target" style="height:74%"></div>
-            <div class="bar actual" style="height:72%"></div>
-            <div class="month">Aug</div>
-          </div>
-
-          <div class="bar-group">
-            <div class="bar target" style="height:78%"></div>
-            <div class="bar actual" style="height:75%"></div>
-            <div class="month">Sep</div>
-          </div>
-
-          <div class="bar-group">
-            <div class="bar target" style="height:85%"></div>
-            <div class="bar actual" style="height:82%"></div>
-            <div class="month">Oct</div>
-          </div>
-
-          <div class="bar-group">
-            <div class="bar target" style="height:93%"></div>
-            <div class="bar actual" style="height:89%"></div>
-            <div class="month">Nov</div>
-          </div>
-
+        <div class="date-badge" id="headerDate">
+          Chưa chọn ngày
         </div>
 
-        <div class="legend">
-          <div>
-            <span class="dot" style="background:#c7d2fe"></span>
-            Target
-          </div>
+      </div>
+    </header>
+
+
+    <main class="container">
+
+      <!-- UPLOAD FILE -->
+      <section class="card upload-card">
+
+        <div class="upload-heading">
 
           <div>
-            <span class="dot" style="background:#4f46e5"></span>
-            Actual Sales
+            <div class="section-title">
+              Nạp dữ liệu Excel
+            </div>
+
+            <div class="section-description">
+              Chọn đủ 3 file Excel rồi bấm “Xử lý dữ liệu”.
+              Dashboard không tải dữ liệu lên máy chủ.
+            </div>
           </div>
-        </div>
 
-      </div>
-
-
-      <!-- CATEGORY -->
-
-      <div class="card">
-
-        <div class="section-title">
-          Category Achievement
-        </div>
-
-        <div class="progress-item">
-          <div class="progress-row">
-            <span>Foods</span>
-            <strong>102%</strong>
-          </div>
-          <div class="progress-bg">
-            <div class="progress" style="width:100%;background:#10b981"></div>
-          </div>
         </div>
 
 
-        <div class="progress-item">
-          <div class="progress-row">
-            <span>Home Care</span>
-            <strong>97%</strong>
+        <div class="upload-grid">
+
+          <!-- PJP -->
+          <div class="upload-box" id="pJPBox">
+
+            <div>
+              <div class="upload-title">
+                1. File PJP / danh sách cửa hàng
+              </div>
+
+              <div class="upload-help">
+                File: export20261118104118.xlsx
+              </div>
+            </div>
+
+            <input
+              class="file-input"
+              type="file"
+              id="pJPFile"
+              accept=".xlsx,.xls,.csv"
+            >
+
+            <div class="file-status" id="pJPStatus">
+              Chưa chọn file
+            </div>
+
           </div>
-          <div class="progress-bg">
-            <div class="progress" style="width:97%;background:#4f46e5"></div>
+
+
+          <!-- KNORR -->
+          <div class="upload-box" id="knorrBox">
+
+            <div>
+              <div class="upload-title">
+                2. File bao phủ Knorr
+              </div>
+
+              <div class="upload-help">
+                File: BAO PHỦ KNORR.xlsx
+              </div>
+            </div>
+
+            <input
+              class="file-input"
+              type="file"
+              id="knorrFile"
+              accept=".xlsx,.xls,.csv"
+            >
+
+            <div class="file-status" id="knorrStatus">
+              Chưa chọn file
+            </div>
+
           </div>
+
+
+          <!-- SALES GAP -->
+          <div class="upload-box" id="salesGapBox">
+
+            <div>
+              <div class="upload-title">
+                3. File CH dưới mức doanh số
+              </div>
+
+              <div class="upload-help">
+                File: CH DƯỚI 1TR.xlsx
+              </div>
+            </div>
+
+            <input
+              class="file-input"
+              type="file"
+              id="salesGapFile"
+              accept=".xlsx,.xls,.csv"
+            >
+
+            <div class="file-status" id="salesGapStatus">
+              Chưa chọn file
+            </div>
+
+          </div>
+
         </div>
 
 
-        <div class="progress-item">
-          <div class="progress-row">
-            <span>Personal Care</span>
-            <strong>94%</strong>
+        <div class="upload-actions">
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="processButton"
+          >
+            Xử lý dữ liệu
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="clearFilesButton"
+          >
+            Xóa dữ liệu
+          </button>
+
+          <div
+            class="global-status"
+            id="globalStatus"
+            aria-live="polite"
+          >
+            Vui lòng chọn đủ 3 file.
           </div>
-          <div class="progress-bg">
-            <div class="progress" style="width:94%;background:#8b5cf6"></div>
-          </div>
+
         </div>
 
-
-        <div class="progress-item">
-          <div class="progress-row">
-            <span>Beauty</span>
-            <strong>88%</strong>
-          </div>
-          <div class="progress-bg">
-            <div class="progress" style="width:88%;background:#f59e0b"></div>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
+      </section>
 
 
-    <!-- DISTRIBUTOR -->
+      <!-- FILTER -->
+      <section class="card filter-card">
 
-    <div class="card table-card">
-
-      <div class="section-title">
-        Distributor / NPP Performance
-      </div>
-
-      <table>
-
-        <thead>
-          <tr>
-            <th>Distributor / Area</th>
-            <th>Target</th>
-            <th>Actual</th>
-            <th>Achievement</th>
-            <th>Active Outlets</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          <tr>
-            <td><strong>Thu Duc</strong></td>
-            <td>3.2B</td>
-            <td>3.28B</td>
-            <td class="green"><strong>102.5%</strong></td>
-            <td>382</td>
-            <td><span class="status good">On Track</span></td>
-          </tr>
-
-          <tr>
-            <td><strong>District 2</strong></td>
-            <td>2.8B</td>
-            <td>2.71B</td>
-            <td><strong>96.8%</strong></td>
-            <td>316</td>
-            <td><span class="status good">Good</span></td>
-          </tr>
-
-          <tr>
-            <td><strong>District 9</strong></td>
-            <td>3.1B</td>
-            <td>2.94B</td>
-            <td class="orange"><strong>94.8%</strong></td>
-            <td>344</td>
-            <td><span class="status warning">Watch</span></td>
-          </tr>
-
-          <tr>
-            <td><strong>Long Khanh</strong></td>
-            <td>2.2B</td>
-            <td>1.91B</td>
-            <td class="red"><strong>86.8%</strong></td>
-            <td>214</td>
-            <td><span class="status risk">Action</span></td>
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-
-    <div class="footer">
-      HCME Sales Dashboard • Demo Version
-    </div>
-
-  </div>
-</div>
-
-
-<script>
-
-function refreshDashboard() {
-
-  const month = document.getElementById("monthFilter").value;
-  const area = document.getElementById("areaFilter").value;
-
-  alert(
-    "Dashboard updated!\n\n" +
-    "Month: " + month +
-    "\nArea: " + area
-  );
-
-}
-
-console.log("HCME Sales Dashboard loaded successfully");
-
-</script>
-
-</body>
-</html>
+        <div class="filter-header
