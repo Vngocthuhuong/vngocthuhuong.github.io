@@ -145,20 +145,46 @@ table{background:#f7f9fd!important}th{background:#dbe5f4!important;color:#18335f
 <script>
 const data={pjp:[],knorr:[],sales:[]};
 const aliases={
- code:['code ch','outlet code','customer code','store code','code','mã ch','ma ch'],
- name:['tên ch','ten ch','outlet name','customer name','store name','tên cửa hàng','ten cua hang'],
- salesman:['salesman','sales rep','sales','nhân viên','nhan vien','dms'],
+ code:['code ch','outlet code','customer code','store code','code','mã ch','ma ch','mã khách hàng','ma khach hang','customer id','outlet id','cust code','customer no','outlet no','mã điểm bán','ma diem ban'],
+ name:['tên ch','ten ch','outlet name','customer name','store name','tên cửa hàng','ten cua hang','tên khách hàng','ten khach hang','customer','outlet','điểm bán','diem ban'],
+ salesman:['salesman','sales man','sales rep','sales representative','salesperson','sales person','sales name','tên salesman','ten salesman','nhân viên','nhan vien','nhân viên bán hàng','nhan vien ban hang','nhân viên sales','nhan vien sales','dms','ss','sr'],
  date:['date','ngày','ngay','visit date','pjp date'],
  sales:['doanh số','doanh so','sales amount','sales value','value','amount','doanh thu'],
  need:['số tiền cần bán','so tien can ban','amount needed','need sales','gap','sales gap','còn thiếu','con thieu']
 };
 function norm(v){return String(v??'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d')}
-function val(row,key){const keys=Object.keys(row);for(const a of aliases[key]){const na=norm(a);const k=keys.find(x=>norm(x)===na);if(k!==undefined)return row[k]}return ''}
-function code(row){return norm(val(row,'code'))}
+function val(row,key){const keys=Object.keys(row);for(const a of aliases[key]){const na=norm(a);let k=keys.find(x=>norm(x)===na);if(k!==undefined)return row[k]}for(const a of aliases[key]){const na=norm(a);let k=keys.find(x=>norm(x).includes(na)||na.includes(norm(x)));if(k!==undefined&&norm(k).length>1)return row[k]}return ''}
+function getExactColumn(row, header){
+  const target=norm(header);
+  const key=Object.keys(row).find(k=>norm(k)===target);
+  return key!==undefined ? row[key] : '';
+}
+function getSalesman(row){
+  return String(getExactColumn(row,'Tên') ?? '').trim();
+}
+function fallbackVal(row,key){
+  if(key==='salesman') return getSalesman(row);
+  const v=val(row,key);
+  if(v!==''&&v!=null)return v;
+  const vals=Object.values(row);
+  if(key==='code')return vals[0]??'';
+  if(key==='name')return vals[1]??'';
+  return '';
+}
+function code(row){return norm(fallbackVal(row,'code'))}
+function removeDuplicateStores(rows){
+  const seen=new Set();
+  return rows.filter(row=>{
+    const c=code(row);
+    if(!c || seen.has(c)) return false;
+    seen.add(c);
+    return true;
+  });
+}
 function num(v){if(typeof v==='number')return v;let s=String(v??'').replace(/[^0-9,.-]/g,'').replace(/,/g,'');let n=Number(s);return Number.isFinite(n)?n:0}
 function dateText(v){if(!v)return '';if(typeof v==='number'&&window.XLSX){const d=XLSX.SSF.parse_date_code(v);if(d)return `${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`;} const d=new Date(v);if(!isNaN(d))return d.toLocaleDateString('vi-VN');return String(v)}
 async function readFile(file){const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});let out=[];wb.SheetNames.forEach(n=>out.push(...XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:''})));return out}
-async function bindFile(inputId,key,statusId){document.getElementById(inputId).addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{data[key]=await readFile(f);document.getElementById(statusId).textContent=`Đã tải: ${f.name} (${data[key].length} dòng)`;refresh()}catch(err){document.getElementById(statusId).textContent='Không đọc được file';console.error(err)}})}
+async function bindFile(inputId,key,statusId){document.getElementById(inputId).addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{data[key]=await readFile(f);if(key==='pjp')data[key]=removeDuplicateStores(data[key]);document.getElementById(statusId).textContent=`Đã tải: ${f.name} (${data[key].length} dòng)`;refresh()}catch(err){document.getElementById(statusId).textContent='Không đọc được file';console.error(err)}})}
 bindFile('pFile','pjp','pStatus');bindFile('kFile','knorr','kStatus');bindFile('sFile','sales','sStatus');
 const dataBtn=document.getElementById('dataBtn');
 dataBtn.addEventListener('click',()=>{
@@ -178,10 +204,10 @@ dataBtn.addEventListener('click',()=>{
 });
 ['dayFilter','salesFilter','searchBox','statusFilter'].forEach(id=>document.getElementById(id).addEventListener(id==='searchBox'?'input':'change',refresh));
 function refresh(){
- const sf=document.getElementById('salesFilter');const current=sf.value;const salesmen=[...new Set(data.pjp.map(r=>String(val(r,'salesman')).trim()).filter(Boolean))].sort();sf.innerHTML='<option value="">Tất cả Salesman</option>'+salesmen.map(x=>`<option${x===current?' selected':''}>${esc(x)}</option>`).join('');
+ const sf=document.getElementById('salesFilter');const current=sf.value;const salesmen=[...new Set(data.pjp.map(r=>getSalesman(r)).filter(Boolean))].sort();sf.innerHTML='<option value="">Tất cả Salesman</option>'+salesmen.map(x=>`<option${x===current?' selected':''}>${esc(x)}</option>`).join('');
  const knorrMap=new Map();data.knorr.forEach(r=>{const c=code(r);if(!c)return;const values=Object.values(r);const colE=values.length>=5?values[4]:'';knorrMap.set(c,norm(colE)==='#n/a');});const salesMap=new Map();data.sales.forEach(r=>{const c=code(r);if(!c)return;const sales=num(val(r,'sales'));let need=num(val(r,'need'));if(!need&&sales<1000000)need=Math.max(0,1000000-sales);salesMap.set(c,{sales,need})});
  const dayF=document.getElementById('dayFilter').value;const salesmanF=sf.value;const q=norm(document.getElementById('searchBox').value);const status=document.getElementById('statusFilter').value;
- let rows=data.pjp.map(r=>{const c=code(r);const sr=salesMap.get(c)||{sales:0,need:0};return{date:val(r,'date'),salesman:String(val(r,'salesman')||''),code:String(val(r,'code')||''),name:String(val(r,'name')||''),covered:!knorrMap.has(c)||!knorrMap.get(c),sales:sr.sales,need:sr.need}});
+ let rows=data.pjp.map(r=>{const c=code(r);const sr=salesMap.get(c)||{sales:0,need:0};return{date:val(r,'date'),salesman:getSalesman(r),code:String(fallbackVal(r,'code')||''),name:String(fallbackVal(r,'name')||''),covered:!knorrMap.has(c)||!knorrMap.get(c),sales:sr.sales,need:sr.need}});
  rows=rows.filter(r=>{let ok=true;if(salesmanF)ok&=r.salesman===salesmanF;if(q)ok&=(norm(r.code).includes(q)||norm(r.name).includes(q));if(dayF){const raw=norm(r.date);const d=new Date(r.date);const days=['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];const day=!isNaN(d)?days[d.getDay()]:String(r.date||'');ok&=(norm(day)===norm(dayF)||raw===norm(dayF))}if(status==='missingKnorr')ok&=!r.covered;if(status==='needSales')ok&=r.need>0;return !!ok});
  document.getElementById('kTotal').textContent=rows.length.toLocaleString('vi-VN');document.getElementById('kMissing').textContent=rows.filter(x=>!x.covered).length.toLocaleString('vi-VN');document.getElementById('kNeed').textContent=rows.filter(x=>x.need>0).length.toLocaleString('vi-VN');document.getElementById('kMoney').textContent=money(rows.reduce((a,x)=>a+x.need,0));
  const body=document.getElementById('body');body.innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.salesman)}</td><td>${esc(r.code)}</td><td>${esc(r.name)}</td><td><span class="pill ${r.covered?'ok':'bad'}">${r.covered?'Đạt':'Chưa đạt'}</span></td><td class="money ${r.need>0?'red':''}">${money(r.need)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Không có cửa hàng phù hợp bộ lọc.</td></tr>';
@@ -190,3 +216,10 @@ function money(v){return Math.round(v||0).toLocaleString('vi-VN')+' ₫'}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 </script>
 </body></html>
+
+<style>
+.head h1{overflow:visible!important;text-shadow:none!important}
+.head h1::after{content:none!important;display:none!important;animation:none!important}
+</style>
+
+<style>.head h1::after{content:none!important;display:none!important;animation:none!important}.head h1{text-shadow:none!important}</style>
