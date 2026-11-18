@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="wrap">
-  <header><h1>Sales Tracking Dashboard</h1><label class="filebtn" for="files">Chọn file mới</label><input id="files" type="file" accept=".xlsx,.xls,.csv" multiple></header>
+  <header><h1>Sales Tracking Dashboard</h1></header>
   <div class="panel">
     <div class="filters">
       <div class="field"><label>Thứ bán</label><select id="day"><option value="">Tất cả</option></select></div>
@@ -19,7 +19,11 @@
       <div class="field"><label>Tìm Code CH / Tên CH</label><input id="search" placeholder="Nhập code hoặc tên cửa hàng"></div>
       <div class="field"><label>Lọc trạng thái</label><select id="status"><option value="all">Tất cả</option><option value="knorr">Knorr</option><option value="under1m">CH dưới 1tr</option></select></div>
     </div>
-    <div class="file-status" id="fileStatus">Chọn cùng lúc file PJP, file Bao phủ Knorr và file doanh số. File PJP mới nhận diện theo các cột: NVBH, Salesman, Thứ bán, Mã cửa hàng, Tên cửa hàng.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px">
+<div><b>1. File PJP</b><br><label class="filebtn" for="pjpFile" style="margin-top:8px">Chọn PJP</label><input id="pjpFile" type="file" accept=".xlsx,.xls"><div class="file-status" id="pjpStatus">Chưa tải file</div></div>
+<div><b>2. File Bao phủ Knorr</b><br><label class="filebtn" for="knorrFile" style="margin-top:8px">Chọn Knorr</label><input id="knorrFile" type="file" accept=".xlsx,.xls"><div class="file-status" id="knorrStatus">Chưa tải file</div></div>
+<div><b>3. File CH dưới 1tr</b><br><label class="filebtn" for="salesFile" style="margin-top:8px">Chọn CH dưới 1tr</label><input id="salesFile" type="file" accept=".xlsx,.xls"><div class="file-status" id="salesStatus">Chưa tải file</div></div>
+</div><div class="file-status" id="fileStatus">Dashboard chỉ xử lý khi nạp đúng 3 file.</div>
   </div>
   <div class="notice" id="notice"></div>
   <section class="cards">
@@ -38,7 +42,7 @@ function value(row,names){const entries=Object.entries(row);for(const n of names
 function read(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});const sheets=wb.SheetNames.map(name=>{const sh=wb.Sheets[name];return{name,objects:XLSX.utils.sheet_to_json(sh,{defval:'',raw:false}),matrix:XLSX.utils.sheet_to_json(sh,{header:1,defval:'',raw:false})}});resolve({sheets,objects:sheets[0]?.objects||[],matrix:sheets[0]?.matrix||[]})}catch(err){reject(err)}};r.onerror=reject;r.readAsArrayBuffer(file)})}
 function detect(data,name){const fn=key(name);if(fn.includes('knorr'))return'knorr';if(fn.includes('1tr')||fn.includes('1 tr')||fn.includes('duoi 1'))return'sales';const all=(data.sheets||[]).flatMap(s=>s.matrix||[]);for(const r of all){const joined=key((r||[]).join('|'));if(joined.includes('thu ban')&&(joined.includes('ma cua hang')||joined.includes('code ch')))return'pjp'}return'unknown'}
 function formatDay(v){const k=key(v),m={monday:'Thứ 2',tuesday:'Thứ 3',wednesday:'Thứ 4',thursday:'Thứ 5',friday:'Thứ 6',saturday:'Thứ 7','thu 2':'Thứ 2','thu 3':'Thứ 3','thu 4':'Thứ 4','thu 5':'Thứ 5','thu 6':'Thứ 6','thu 7':'Thứ 7'};return m[k]||norm(v)}
-function processPjp(matrix){pjp=[];for(let i=1;i<matrix.length;i++){const r=matrix[i]||[];const salesman=norm(r[1]);const day=formatDay(r[2]);const c=code(r[3]);const name=norm(r[4]);if(!c)continue;pjp.push({salesman,day,code:c,name})}}
+function processPjp(matrix){pjp=[];let hi=matrix.findIndex(r=>key((r||[]).join('|')).includes('thu ban'));if(hi<0)hi=0;const h=matrix[hi]||[];const dayI=Math.max(0,h.findIndex(x=>key(x).includes('thu ban')));let nameI=h.findIndex(x=>key(x).includes('ten ch')||key(x).includes('ten cua hang'));if(nameI<0)nameI=4;for(let i=hi+1;i<matrix.length;i++){const r=matrix[i]||[];const salesman=norm(r[1]);const c=code(r[3]);if(!c)continue;pjp.push({salesman,day:formatDay(r[dayI]),code:c,name:norm(r[nameI])})}}
 function findSheet(data,name){return(data.sheets||[]).find(s=>key(s.name)===key(name))||(data.sheets||[])[0]}
 function processKnorr(data){knorrMap.clear();const sh=findSheet(data,'Sheet1');for(const r of (sh?.matrix||[]).slice(2)){const c=code(r?.[0]);if(!c)continue;knorrMap.set(c,{bad:norm(r?.[4])==='#N/A'})}}
 function processSales(data){salesMap.clear();const sh=findSheet(data,'Sheet1');for(const r of (sh?.matrix||[]).slice(2)){const c=code(r?.[0]);if(!c)continue;const amount=num(r?.[4]);const flag=norm(r?.[6]);salesMap.set(c,{amount,flag})}}
@@ -46,7 +50,9 @@ function enrich(o){const k=knorrMap.get(o.code);const knorrBad=!!(k&&k.bad);cons
 function fillFilters(){const days=['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'].filter(d=>pjp.some(x=>x.day===d));$('day').innerHTML='<option value="">Tất cả</option>'+days.map(x=>`<option>${x}</option>`).join('');const sm=[...new Set(pjp.map(x=>x.salesman).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'vi'));$('salesman').innerHTML='<option value="">Tất cả</option>'+sm.map(x=>`<option>${esc(x)}</option>`).join('')}
 function esc(s){return norm(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function render(){let data=pjp.map(enrich),d=$('day').value,sm=$('salesman').value,q=key($('search').value),st=$('status').value;if(d)data=data.filter(x=>x.day===d);if(sm)data=data.filter(x=>x.salesman===sm);if(q)data=data.filter(x=>key(x.code).includes(q)||key(x.name).includes(q));if(st==='knorr')data=data.filter(x=>x.knorrBad);if(st==='under1m')data=data.filter(x=>x.under);$('total').textContent=data.length;$('knorrCount').textContent=data.filter(x=>x.knorrBad).length;$('underCount').textContent=data.filter(x=>x.under).length;$('moneyTotal').textContent=new Intl.NumberFormat('vi-VN').format(data.reduce((a,x)=>a+x.need,0))+' đ';$('rows').innerHTML=data.length?data.map(x=>`<tr><td>${esc(x.salesman)}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td><span class="badge ${x.knorrBad?'bad':'ok'}">${esc(x.knorrBad?'Chưa đạt':'Đạt')}</span></td><td class="money">${x.salesAchieved?'<span class="badge ok">Đạt</span>':new Intl.NumberFormat('vi-VN').format(x.need)+' đ'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Không có cửa hàng phù hợp bộ lọc.</td></tr>'}
-$('files').addEventListener('change',async e=>{const files=[...e.target.files];if(!files.length)return;let unknown=[];for(const f of files){try{const data=await read(f),type=detect(data,f.name);if(type==='pjp')processPjp(data.matrix);else if(type==='knorr')processKnorr(data);else if(type==='sales')processSales(data);else unknown.push(f.name)}catch(err){unknown.push(f.name)}}fillFilters();render();$('fileStatus').textContent=`Đã nạp: ${files.map(f=>f.name).join(', ')}. PJP: ${pjp.length} dòng cửa hàng, giữ nguyên toàn bộ mã trùng.`;if(unknown.length){$('notice').style.display='block';$('notice').textContent='Chưa nhận diện được: '+unknown.join(', ')+'. Hãy kiểm tra tên cột.'}else $('notice').style.display='none'});
+let loaded={pjp:false,knorr:false,sales:false};
+async function loadDedicated(id,type,statusId){const f=$(id).files[0];if(!f)return;try{const data=await read(f);if(type==='pjp')processPjp(data.matrix);if(type==='knorr')processKnorr(data);if(type==='sales')processSales(data);loaded[type]=true;$(statusId).textContent='Đã tải: '+f.name;if(type==='pjp')fillFilters();$('fileStatus').textContent=`PJP: ${pjp.length} dòng | Knorr: ${knorrMap.size} mã | CH dưới 1tr: ${salesMap.size} mã`;render()}catch(e){$(statusId).textContent='Lỗi đọc file';$('notice').style.display='block';$('notice').textContent='Không đọc được '+f.name+': '+e.message}}
+[['pjpFile','pjp','pjpStatus'],['knorrFile','knorr','knorrStatus'],['salesFile','sales','salesStatus']].forEach(([id,t,st])=>$(id).addEventListener('change',()=>loadDedicated(id,t,st)));
 ['day','salesman','status'].forEach(id=>$(id).addEventListener('change',render));$('search').addEventListener('input',render);
 </script>
 </body></html>
