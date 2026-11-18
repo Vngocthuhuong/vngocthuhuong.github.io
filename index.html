@@ -1,0 +1,73 @@
+<div>
+ 
+<div class="store-name">
+${o.code} · ${o.name}
+</div>
+ 
+<div class="channel">
+Channel: ${o.channel}
+· ${o.team}
+· ${o.sm}
+</div>
+ 
+</div>
+ 
+</div>
+ 
+<div class="products">
+ 
+${productsHTML}
+ 
+</div>
+ 
+`;
+ 
+ 
+list.appendChild(div);
+ 
+});
+ 
+}
+ 
+ 
+function selectTab(button){
+ 
+document
+.querySelectorAll(".tab")
+.forEach(t=>t.classList.remove("active"));
+ 
+button.classList.add("active");
+ 
+}
+ 
+ 
+document
+.getElementById("searchBox")
+.addEventListener("input",render);
+ 
+document
+.getElementById("teamFilter")
+.addEventListener("change",render);
+ 
+document
+.getElementById("smFilter")
+.addEventListener("change",render);
+ 
+document
+.getElementById("dayFilter")
+.addEventListener("change",render);
+ 
+ 
+const date = new Date();
+ 
+document.getElementById("today")
+.textContent =
+date.toLocaleDateString("vi-VN");
+ 
+ 
+render();
+ 
+</script>
+ 
+</body>
+</html>
