@@ -1,73 +1,288 @@
-<div>
- 
-<div class="store-name">
-${o.code} · ${o.name}
-</div>
- 
-<div class="channel">
-Channel: ${o.channel}
-· ${o.team}
-· ${o.sm}
-</div>
- 
-</div>
- 
-</div>
- 
-<div class="products">
- 
-${productsHTML}
- 
-</div>
- 
-`;
- 
- 
-list.appendChild(div);
- 
-});
- 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HCME Sales Dashboard</title>
+
+<style>
+* {
+  box-sizing: border-box;
 }
- 
- 
-function selectTab(button){
- 
-document
-.querySelectorAll(".tab")
-.forEach(t=>t.classList.remove("active"));
- 
-button.classList.add("active");
- 
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #eef2ff;
+  color: #172554;
 }
- 
- 
-document
-.getElementById("searchBox")
-.addEventListener("input",render);
- 
-document
-.getElementById("teamFilter")
-.addEventListener("change",render);
- 
-document
-.getElementById("smFilter")
-.addEventListener("change",render);
- 
-document
-.getElementById("dayFilter")
-.addEventListener("change",render);
- 
- 
-const date = new Date();
- 
-document.getElementById("today")
-.textContent =
-date.toLocaleDateString("vi-VN");
- 
- 
-render();
- 
-</script>
- 
-</body>
-</html>
+
+.app {
+  max-width: 650px;
+  margin: auto;
+  min-height: 100vh;
+  background: #f5f7ff;
+}
+
+/* HEADER */
+
+.header {
+  background: linear-gradient(135deg, #07143f, #152b78);
+  color: white;
+  padding: 22px 16px 18px;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.smallTitle {
+  font-size: 11px;
+  opacity: .7;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.mainTitle {
+  font-size: 26px;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+.subTitle {
+  color: #22d3ee;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+.updated {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #67e8f9;
+  background: rgba(255,255,255,.08);
+  padding: 8px 10px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+/* TABS */
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.tab {
+  border: 1px solid #4669bd;
+  background: #0c1948;
+  color: white;
+  padding: 11px 4px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: linear-gradient(135deg,#384bcc,#6759ff);
+  border-color: #22d3ee;
+  box-shadow: 0 0 10px rgba(34,211,238,.45);
+}
+
+/* FILTER */
+
+.filters {
+  margin: 12px;
+  background: white;
+  border-radius: 14px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.06);
+}
+
+select,
+input {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #d3dbea;
+  border-radius: 9px;
+  background: white;
+  color: #334155;
+  outline: none;
+  font-size: 12px;
+}
+
+/* STATUS BOX */
+
+.statusBox {
+  margin: 10px 12px;
+  padding: 11px;
+  border-radius: 13px;
+}
+
+.redBox {
+  background: #fff0f5;
+  border: 1px solid #ff9eb9;
+}
+
+.yellowBox {
+  background: #fff9e5;
+  border: 1px solid #f5cd42;
+}
+
+.statusTitle {
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.redText {
+  color: #dd174a;
+}
+
+.yellowText {
+  color: #9a7000;
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 5px;
+}
+
+.chip {
+  padding: 9px 2px;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.redChip {
+  background: #ffd7e2;
+  color: #d91548;
+}
+
+.yellowChip {
+  background: #ffefa1;
+  color: #806200;
+}
+
+/* SUMMARY */
+
+.summary {
+  padding: 8px 15px;
+}
+
+.number {
+  font-size: 30px;
+  font-weight: 900;
+  color: #211aa1;
+}
+
+.legend {
+  font-size: 10px;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 3px;
+}
+
+.greenDot {
+  background: #00b85a;
+}
+
+.yellowDot {
+  background: #ffc107;
+}
+
+.redDot {
+  background: #ff2864;
+}
+
+/* OUTLETS */
+
+.outletList {
+  padding: 5px 12px 30px;
+}
+
+.outlet {
+  background: white;
+  border: 1px solid #d9e0ee;
+  border-radius: 13px;
+  margin-bottom: 10px;
+  padding: 11px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.04);
+}
+
+.outletHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  background: #edf1ff;
+  color: #3646bf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.storeName {
+  color: #2737aa;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.storeInfo {
+  color: #64748b;
+  font-size: 9px;
+  margin-top: 4px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.product {
+  border-radius: 9px;
+  padding: 11px 5px;
+  min-height: 65px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.productStatus {
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+}
+
+.covered {
+  background: #
