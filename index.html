@@ -1,288 +1,636 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>HCME Sales Dashboard</title>
+  <title>HCME Sales Dashboard</title>
 
-<style>
-* {
-  box-sizing: border-box;
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #111827, #312e81);
+      color: white;
+      padding: 26px 32px;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: #c7d2fe;
+      font-size: 14px;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    /* MAIN */
+    .container {
+      max-width: 1400px;
+      margin: auto;
+      padding: 28px;
+    }
+
+    /* FILTER */
+    .filter-bar {
+      background: white;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 22px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    select, button {
+      padding: 10px 14px;
+      border-radius: 9px;
+      border: 1px solid #d1d5db;
+      background: white;
+      font-size: 14px;
+    }
+
+    button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #4338ca;
+    }
+
+    /* KPI */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+    }
+
+    .kpi-title {
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 27px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .green {
+      color: #059669;
+    }
+
+    .red {
+      color: #dc2626;
+    }
+
+    .blue {
+      color: #4f46e5;
+    }
+
+    .orange {
+      color: #d97706;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* CHART AREA */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    /* CSS BAR CHART */
+    .chart {
+      height: 280px;
+      display: flex;
+      align-items: flex-end;
+      gap: 18px;
+      padding-top: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .bar-group {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 5px;
+      position: relative;
+      padding-bottom: 30px;
+    }
+
+    .bar {
+      width: 26px;
+      border-radius: 7px 7px 0 0;
+      transition: 0.3s;
+    }
+
+    .bar:hover {
+      opacity: 0.75;
+    }
+
+    .target {
+      background: #c7d2fe;
+    }
+
+    .actual {
+      background: #4f46e5;
+    }
+
+    .month {
+      position: absolute;
+      bottom: 5px;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .legend {
+      display: flex;
+      gap: 18px;
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 15px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      border-radius: 3px;
+      margin-right: 5px;
+    }
+
+    /* PROGRESS */
+    .progress-item {
+      margin-bottom: 20px;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .progress-bg {
+      height: 9px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      border-radius: 10px;
+    }
+
+    /* TABLE */
+    .table-card {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #6b7280;
+      font-size: 12px;
+      text-align: left;
+      padding: 13px;
+    }
+
+    td {
+      padding: 14px 13px;
+      border-top: 1px solid #edf0f5;
+      font-size: 13px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .good {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .warning {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .risk {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 11px;
+      padding: 30px;
+    }
+
+    @media(max-width: 900px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media(max-width: 520px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .header {
+        padding: 22px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <div class="header-content">
+
+      <div>
+        <h1>HCME Sales Dashboard</h1>
+        <p>Ho Chi Minh East | Sales Performance Overview</p>
+      </div>
+
+      <div class="badge">
+        November Performance
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="container">
+
+    <!-- FILTER -->
+
+    <div class="filter-bar">
+
+      <strong>Filters</strong>
+
+      <select id="monthFilter">
+        <option>November</option>
+        <option>October</option>
+        <option>September</option>
+      </select>
+
+      <select id="areaFilter">
+        <option>All HCME</option>
+        <option>Thu Duc</option>
+        <option>District 2</option>
+        <option>District 9</option>
+        <option>Long Khanh</option>
+      </select>
+
+      <button onclick="refreshDashboard()">
+        Update Dashboard
+      </button>
+
+    </div>
+
+
+    <!-- KPI -->
+
+    <div class="kpi-grid">
+
+      <div class="card">
+        <div class="kpi-title">TOTAL SALES</div>
+        <div class="kpi-value">12.8B</div>
+        <div class="small">
+          <span class="green">▲ 8.4%</span> vs last month
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="kpi-title">TARGET ACHIEVEMENT</div>
+        <div class="kpi-value blue">96.3%</div>
+        <div class="small">
+          Target: 13.3B
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="kpi-title">ACTIVE OUTLETS</div>
+        <div class="kpi-value">1,428</div>
+        <div class="small">
+          <span class="green">▲ 46 outlets</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="kpi-title">PRODUCTIVITY</div>
+        <div class="kpi-value orange">89.7%</div>
+        <div class="small">
+          Productive visits / total visits
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- MAIN -->
+
+    <div class="main-grid">
+
+      <!-- SALES TREND -->
+
+      <div class="card">
+
+        <div class="section-title">
+          Sales Trend | Target vs Actual
+        </div>
+
+        <div class="chart">
+
+          <div class="bar-group">
+            <div class="bar target" style="height:65%"></div>
+            <div class="bar actual" style="height:61%"></div>
+            <div class="month">Jun</div>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar target" style="height:68%"></div>
+            <div class="bar actual" style="height:66%"></div>
+            <div class="month">Jul</div>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar target" style="height:74%"></div>
+            <div class="bar actual" style="height:72%"></div>
+            <div class="month">Aug</div>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar target" style="height:78%"></div>
+            <div class="bar actual" style="height:75%"></div>
+            <div class="month">Sep</div>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar target" style="height:85%"></div>
+            <div class="bar actual" style="height:82%"></div>
+            <div class="month">Oct</div>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar target" style="height:93%"></div>
+            <div class="bar actual" style="height:89%"></div>
+            <div class="month">Nov</div>
+          </div>
+
+        </div>
+
+        <div class="legend">
+          <div>
+            <span class="dot" style="background:#c7d2fe"></span>
+            Target
+          </div>
+
+          <div>
+            <span class="dot" style="background:#4f46e5"></span>
+            Actual Sales
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- CATEGORY -->
+
+      <div class="card">
+
+        <div class="section-title">
+          Category Achievement
+        </div>
+
+        <div class="progress-item">
+          <div class="progress-row">
+            <span>Foods</span>
+            <strong>102%</strong>
+          </div>
+          <div class="progress-bg">
+            <div class="progress" style="width:100%;background:#10b981"></div>
+          </div>
+        </div>
+
+
+        <div class="progress-item">
+          <div class="progress-row">
+            <span>Home Care</span>
+            <strong>97%</strong>
+          </div>
+          <div class="progress-bg">
+            <div class="progress" style="width:97%;background:#4f46e5"></div>
+          </div>
+        </div>
+
+
+        <div class="progress-item">
+          <div class="progress-row">
+            <span>Personal Care</span>
+            <strong>94%</strong>
+          </div>
+          <div class="progress-bg">
+            <div class="progress" style="width:94%;background:#8b5cf6"></div>
+          </div>
+        </div>
+
+
+        <div class="progress-item">
+          <div class="progress-row">
+            <span>Beauty</span>
+            <strong>88%</strong>
+          </div>
+          <div class="progress-bg">
+            <div class="progress" style="width:88%;background:#f59e0b"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- DISTRIBUTOR -->
+
+    <div class="card table-card">
+
+      <div class="section-title">
+        Distributor / NPP Performance
+      </div>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Distributor / Area</th>
+            <th>Target</th>
+            <th>Actual</th>
+            <th>Achievement</th>
+            <th>Active Outlets</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr>
+            <td><strong>Thu Duc</strong></td>
+            <td>3.2B</td>
+            <td>3.28B</td>
+            <td class="green"><strong>102.5%</strong></td>
+            <td>382</td>
+            <td><span class="status good">On Track</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>District 2</strong></td>
+            <td>2.8B</td>
+            <td>2.71B</td>
+            <td><strong>96.8%</strong></td>
+            <td>316</td>
+            <td><span class="status good">Good</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>District 9</strong></td>
+            <td>3.1B</td>
+            <td>2.94B</td>
+            <td class="orange"><strong>94.8%</strong></td>
+            <td>344</td>
+            <td><span class="status warning">Watch</span></td>
+          </tr>
+
+          <tr>
+            <td><strong>Long Khanh</strong></td>
+            <td>2.2B</td>
+            <td>1.91B</td>
+            <td class="red"><strong>86.8%</strong></td>
+            <td>214</td>
+            <td><span class="status risk">Action</span></td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <div class="footer">
+      HCME Sales Dashboard • Demo Version
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+
+function refreshDashboard() {
+
+  const month = document.getElementById("monthFilter").value;
+  const area = document.getElementById("areaFilter").value;
+
+  alert(
+    "Dashboard updated!\n\n" +
+    "Month: " + month +
+    "\nArea: " + area
+  );
+
 }
 
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #eef2ff;
-  color: #172554;
-}
+console.log("HCME Sales Dashboard loaded successfully");
 
-.app {
-  max-width: 650px;
-  margin: auto;
-  min-height: 100vh;
-  background: #f5f7ff;
-}
+</script>
 
-/* HEADER */
-
-.header {
-  background: linear-gradient(135deg, #07143f, #152b78);
-  color: white;
-  padding: 22px 16px 18px;
-}
-
-.headerTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.smallTitle {
-  font-size: 11px;
-  opacity: .7;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.mainTitle {
-  font-size: 26px;
-  font-weight: 900;
-  margin-top: 4px;
-}
-
-.subTitle {
-  color: #22d3ee;
-  font-size: 12px;
-  font-weight: 700;
-  margin-top: 5px;
-}
-
-.updated {
-  font-size: 10px;
-  line-height: 1.5;
-  color: #67e8f9;
-  background: rgba(255,255,255,.08);
-  padding: 8px 10px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-/* TABS */
-
-.tabs {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 7px;
-  margin-top: 18px;
-}
-
-.tab {
-  border: 1px solid #4669bd;
-  background: #0c1948;
-  color: white;
-  padding: 11px 4px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.tab.active {
-  background: linear-gradient(135deg,#384bcc,#6759ff);
-  border-color: #22d3ee;
-  box-shadow: 0 0 10px rgba(34,211,238,.45);
-}
-
-/* FILTER */
-
-.filters {
-  margin: 12px;
-  background: white;
-  border-radius: 14px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  box-shadow: 0 3px 10px rgba(0,0,0,.06);
-}
-
-select,
-input {
-  width: 100%;
-  padding: 11px;
-  border: 1px solid #d3dbea;
-  border-radius: 9px;
-  background: white;
-  color: #334155;
-  outline: none;
-  font-size: 12px;
-}
-
-/* STATUS BOX */
-
-.statusBox {
-  margin: 10px 12px;
-  padding: 11px;
-  border-radius: 13px;
-}
-
-.redBox {
-  background: #fff0f5;
-  border: 1px solid #ff9eb9;
-}
-
-.yellowBox {
-  background: #fff9e5;
-  border: 1px solid #f5cd42;
-}
-
-.statusTitle {
-  font-size: 12px;
-  font-weight: 900;
-  margin-bottom: 8px;
-}
-
-.redText {
-  color: #dd174a;
-}
-
-.yellowText {
-  color: #9a7000;
-}
-
-.chips {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 5px;
-}
-
-.chip {
-  padding: 9px 2px;
-  border-radius: 7px;
-  text-align: center;
-  font-size: 9px;
-  font-weight: bold;
-}
-
-.redChip {
-  background: #ffd7e2;
-  color: #d91548;
-}
-
-.yellowChip {
-  background: #ffefa1;
-  color: #806200;
-}
-
-/* SUMMARY */
-
-.summary {
-  padding: 8px 15px;
-}
-
-.number {
-  font-size: 30px;
-  font-weight: 900;
-  color: #211aa1;
-}
-
-.legend {
-  font-size: 10px;
-  color: #64748b;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 3px;
-}
-
-.greenDot {
-  background: #00b85a;
-}
-
-.yellowDot {
-  background: #ffc107;
-}
-
-.redDot {
-  background: #ff2864;
-}
-
-/* OUTLETS */
-
-.outletList {
-  padding: 5px 12px 30px;
-}
-
-.outlet {
-  background: white;
-  border: 1px solid #d9e0ee;
-  border-radius: 13px;
-  margin-bottom: 10px;
-  padding: 11px;
-  box-shadow: 0 2px 5px rgba(0,0,0,.04);
-}
-
-.outletHeader {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.rank {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  border-radius: 50%;
-  background: #edf1ff;
-  color: #3646bf;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-}
-
-.storeName {
-  color: #2737aa;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.storeInfo {
-  color: #64748b;
-  font-size: 9px;
-  margin-top: 4px;
-}
-
-.products {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.product {
-  border-radius: 9px;
-  padding: 11px 5px;
-  min-height: 65px;
-  text-align: center;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.productStatus {
-  display: block;
-  margin-top: 8px;
-  font-size: 10px;
-}
-
-.covered {
-  background: #
+</body>
+</html>
