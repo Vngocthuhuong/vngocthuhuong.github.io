@@ -3,21 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HCME Sales Coverage Dashboard</title>
+<title>Sales Tracking Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
-:root{--blue:#2563eb;--navy:#0f172a;--bg:#f1f5f9;--card:#fff;--muted:#64748b;--red:#dc2626;--green:#16a34a;--amber:#d97706}
+:root{--blue:#2563eb;--navy:#f8fafc;--bg:#0b1220;--card:#111827;--muted:#cbd5e1;--red:#f472b6;--green:#22c55e;--amber:#60a5fa}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--navy)}
 .wrap{max-width:1250px;margin:auto;padding:22px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.head h1{margin:0;font-size:25px}.head p{margin:5px 0;color:var(--muted)}
-.panel,.kpi,.tablebox{background:var(--card);border-radius:14px;box-shadow:0 2px 10px #0f172a12}.panel{padding:16px;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.field label{font-size:12px;font-weight:700;color:#475569;display:block;margin-bottom:6px}.field input,.field select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff}.uploads{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.upload{border:1px dashed #94a3b8;border-radius:10px;padding:10px}.upload b{display:block;font-size:13px;margin-bottom:6px}.status{font-size:12px;color:var(--muted);margin-top:4px}
+.dataBtn{border:0;border-radius:10px;background:#2563eb;color:#fff;padding:11px 18px;font-weight:700;cursor:pointer}.dataBtn:hover{background:#1d4ed8}.dataBtn:focus{outline:3px solid #93c5fd;outline-offset:2px}.panel,.kpi,.tablebox{background:var(--card);border-radius:14px;box-shadow:0 8px 24px #00000040}.panel{padding:16px;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.field label{font-size:12px;font-weight:700;color:#e2e8f0;display:block;margin-bottom:6px}.field input,.field select{width:100%;padding:10px;border:1px solid #475569;border-radius:9px;background:#1f2937;color:#f8fafc}.uploads{display:none;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.upload{border:1px dashed #94a3b8;border-radius:10px;padding:10px}.upload b{display:block;font-size:13px;margin-bottom:6px}.status{font-size:12px;color:var(--muted);margin-top:4px}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.kpi{padding:16px}.kpi .lbl{font-size:13px;color:var(--muted)}.kpi .num{font-size:27px;font-weight:800;margin-top:7px}.red{color:var(--red)}.amber{color:var(--amber)}.green{color:var(--green)}
-.tablebox{overflow:auto}.tabletitle{padding:15px 16px;border-bottom:1px solid #e2e8f0;font-weight:800}table{border-collapse:collapse;width:100%;min-width:900px}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e2e8f0;font-size:13px}th{background:#f8fafc;position:sticky;top:0}.pill{padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700}.bad{background:#fee2e2;color:#991b1b}.ok{background:#dcfce7;color:#166534}.money{text-align:right;font-weight:700}.empty{text-align:center!important;color:var(--muted);padding:35px!important}
-.note{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}@media(max-width:800px){.grid,.uploads,.kpis{grid-template-columns:1fr 1fr}}@media(max-width:520px){.grid,.uploads,.kpis{grid-template-columns:1fr}.wrap{padding:12px}}
+.tablebox{overflow:auto}.tabletitle{padding:15px 16px;border-bottom:1px solid #374151;font-weight:800}table{border-collapse:collapse;width:100%;min-width:900px}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #374151;font-size:13px}th{background:#1f2937;position:sticky;top:0}.pill{padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700}.bad{background:#fee2e2;color:#991b1b}.ok{background:#dcfce7;color:#166534}.money{text-align:right;font-weight:700}.empty{text-align:center!important;color:var(--muted);padding:35px!important}
+.note{display:none;font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}.kpi-total{background:#15803d}.kpi-knorr{background:#be185d}.kpi-under{background:#1d4ed8}.kpi-money{background:#7e22ce}.kpi-total .lbl,.kpi-knorr .lbl,.kpi-under .lbl,.kpi-money .lbl{color:#f8fafc}.kpi-total .num,.kpi-knorr .num,.kpi-under .num,.kpi-money .num{color:#fff}.tabletitle{color:#f8fafc}tbody tr:hover{background:#172033}
+
+/* Refined dark theme: readable controls + pastel KPI cards */
+body{background:#0b1020;color:#f8fafc}
+.head h1{color:#ffffff;font-weight:800}
+.panel,.tablebox{background:#131c2e;border:1px solid #334155}
+.field label{color:#f1f5f9;font-weight:700}
+.field input,.field select{background:#0f172a;color:#f8fafc;border:1.5px solid #64748b}
+.field input::placeholder{color:#94a3b8}
+.field input:focus,.field select:focus{outline:2px solid #93c5fd;outline-offset:1px;border-color:#93c5fd}
+.dataBtn{background:#c7d2fe;color:#1e1b4b;border:2px solid #818cf8;font-size:15px;font-weight:800;box-shadow:0 4px 16px #00000035}
+.dataBtn:hover{background:#a5b4fc;color:#111827}
+.upload{background:#0f172a;border:1.5px dashed #64748b;color:#f8fafc}
+.upload .status,.status{color:#cbd5e1}
+.upload input::file-selector-button{background:#dbeafe;color:#172554;border:1px solid #93c5fd;border-radius:7px;padding:7px 10px;font-weight:700;cursor:pointer}
+.kpi{border-width:2px;border-style:solid;box-shadow:0 8px 20px #00000030;padding:18px}
+.kpi .lbl{font-size:18px;font-weight:800}
+.kpi .num{font-size:34px;font-weight:900;margin-top:9px}
+.kpi-total{background:#d1fae5;border-color:#6ee7b7}.kpi-total .lbl,.kpi-total .num{color:#064e3b}
+.kpi-knorr{background:#fce7f3;border-color:#f9a8d4}.kpi-knorr .lbl,.kpi-knorr .num{color:#831843}
+.kpi-under{background:#dbeafe;border-color:#93c5fd}.kpi-under .lbl,.kpi-under .num{color:#1e3a8a}
+.kpi-money{background:#ede9fe;border-color:#c4b5fd}.kpi-money .lbl,.kpi-money .num{color:#4c1d95}
+.tabletitle{color:#fff;font-size:18px;font-weight:800}
+th{background:#1e293b;color:#f8fafc}td{color:#e2e8f0}
+.pill.ok{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}.pill.bad{background:#fce7f3;color:#9d174d;border:1px solid #f9a8d4}
+
+/* Final visual refinement */
+*{font-family:Arial,Helvetica,sans-serif!important}
+button,input,select,table,th,td{font-family:Arial,Helvetica,sans-serif!important}
+body{font-weight:400;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.head h1{font-family:Arial,Helvetica,sans-serif!important;font-size:38px;font-weight:700;letter-spacing:-.5px}
+.field label{font-size:14px;font-weight:700;color:#f8fafc}
+.field input,.field select{font-size:16px;background:#11182b;color:#fff;border-color:#74819b}
+.field input::placeholder{color:#b9c4d8;opacity:1}
+.dataBtn{font-family:Arial,Helvetica,sans-serif!important;background:#d8d4f2;color:#29234f;border:1.5px solid #aaa2df;border-radius:12px;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease}
+.dataBtn:hover{background:#e4e1f7;color:#211b48;border-color:#c2bceb;transform:translateY(-2px);box-shadow:0 9px 22px #00000045}
+.dataBtn:active{transform:translateY(0);box-shadow:0 4px 10px #00000035}
+.kpi{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;border-width:1.5px;cursor:default}
+.kpi:hover{transform:translateY(-5px);box-shadow:0 14px 30px #00000045;filter:brightness(1.035)}
+.kpi .lbl{font-family:Arial,Helvetica,sans-serif!important;font-size:19px;font-weight:700;line-height:1.25}
+.kpi .num{font-family:Arial,Helvetica,sans-serif!important;font-size:36px;font-weight:800;line-height:1.1}
+.kpi-total{background:#dcefe4;border-color:#91bea2}.kpi-total .lbl,.kpi-total .num{color:#174b31}
+.kpi-knorr{background:#f1dfe8;border-color:#cda2b7}.kpi-knorr .lbl,.kpi-knorr .num{color:#6e2948}
+.kpi-under{background:#dde7f3;border-color:#9fb7d3}.kpi-under .lbl,.kpi-under .num{color:#294d76}
+.kpi-money{background:#e9e1f1;border-color:#bba5ce}.kpi-money .lbl,.kpi-money .num{color:#57356f}
+.tablebox{border-color:#45526a;background:#11192b}
+.tabletitle{font-family:Arial,Helvetica,sans-serif!important;color:#fff;font-size:19px;font-weight:700;background:#151d31}
+table{background:#11192b}
+th{font-family:Arial,Helvetica,sans-serif!important;background:#263148;color:#fff;font-size:14px;font-weight:700;border-bottom:1px solid #53617a}
+td{font-family:Arial,Helvetica,sans-serif!important;color:#f8fafc;font-size:14px;font-weight:500;border-bottom:1px solid #334158}
+tbody tr:nth-child(even){background:#162036}tbody tr:hover{background:#202d47}
+.empty{color:#d5deed!important;font-weight:500!important}
+.pill{font-family:Arial,Helvetica,sans-serif!important;font-weight:700}
+
+/* Dark bling refinement */
+.kpi{position:relative;overflow:hidden;background:#151827!important;border:1px solid transparent!important;box-shadow:0 7px 22px #0008;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.kpi::after{content:"";position:absolute;inset:-60% -25%;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.20) 49%,rgba(255,255,255,.05) 54%,transparent 61%);transform:translateX(-65%);transition:transform .55s ease;pointer-events:none}
+.kpi:hover::after{transform:translateX(65%)}
+.kpi:hover{transform:translateY(-4px) scale(1.01)}
+.kpi .lbl{font-size:16px!important;font-weight:700!important;letter-spacing:.1px}.kpi .num{font-size:30px!important;font-weight:800!important;margin-top:10px}
+.kpi-total{border-color:#5ab98a!important;box-shadow:0 0 0 1px #5ab98a55,0 8px 22px #0008,0 0 18px #5ab98a20!important}.kpi-total .lbl,.kpi-total .num{color:#9be0ba!important}
+.kpi-knorr{border-color:#c7799d!important;box-shadow:0 0 0 1px #c7799d55,0 8px 22px #0008,0 0 18px #c7799d20!important}.kpi-knorr .lbl,.kpi-knorr .num{color:#e6a7c4!important}
+.kpi-under{border-color:#789fd0!important;box-shadow:0 0 0 1px #789fd055,0 8px 22px #0008,0 0 18px #789fd020!important}.kpi-under .lbl,.kpi-under .num{color:#abc6e8!important}
+.kpi-money{border-color:#a88bc2!important;box-shadow:0 0 0 1px #a88bc255,0 8px 22px #0008,0 0 18px #a88bc220!important}.kpi-money .lbl,.kpi-money .num{color:#cfb6e2!important}
+.kpi-total:hover{box-shadow:0 12px 30px #0009,0 0 26px #5ab98a45!important}.kpi-knorr:hover{box-shadow:0 12px 30px #0009,0 0 26px #c7799d45!important}.kpi-under:hover{box-shadow:0 12px 30px #0009,0 0 26px #789fd045!important}.kpi-money:hover{box-shadow:0 12px 30px #0009,0 0 26px #a88bc245!important}
+.dataBtn{background:#25243a!important;color:#e9e4ff!important;border-color:#8e82cf!important;box-shadow:0 0 14px #8e82cf30!important}.dataBtn:hover{background:#302e4b!important;color:#fff!important;box-shadow:0 8px 22px #0007,0 0 22px #9b8ee75a!important}
+
+/* Brighter dark background + pastel KPIs + subtle title shimmer */
+body{background:linear-gradient(135deg,#151a2d 0%,#1d2440 48%,#182238 100%)!important;color:#f8fafc}
+.panel,.tablebox{background:#1d2439!important;border-color:#46516c!important;box-shadow:0 10px 26px #0a0d1838!important}
+.field input,.field select{background:#222a43!important;color:#fff!important;border-color:#687694!important}
+th{background:#303a55!important;color:#fff!important}td{background:#1d2439;color:#f8fafc!important}tbody tr:nth-child(even) td{background:#222b43!important}tbody tr:hover td{background:#2a3552!important}
+.kpi{background:#151827!important}
+.kpi-total{background:#dcefe4!important;border-color:#89b99e!important;box-shadow:0 8px 22px #0005,0 0 15px #8bc5a733!important}.kpi-total .lbl,.kpi-total .num{color:#174b31!important}
+.kpi-knorr{background:#f1dfe8!important;border-color:#cba1b6!important;box-shadow:0 8px 22px #0005,0 0 15px #d3a3ba33!important}.kpi-knorr .lbl,.kpi-knorr .num{color:#6e2948!important}
+.kpi-under{background:#dde7f3!important;border-color:#9db5d0!important;box-shadow:0 8px 22px #0005,0 0 15px #9dbadd33!important}.kpi-under .lbl,.kpi-under .num{color:#294d76!important}
+.kpi-money{background:#e9e1f1!important;border-color:#b9a4cc!important;box-shadow:0 8px 22px #0005,0 0 15px #bda9d133!important}.kpi-money .lbl,.kpi-money .num{color:#57356f!important}
+.head h1{position:relative;display:inline-block;color:#eef3ff!important;text-shadow:0 0 12px rgba(166,180,255,.20);overflow:hidden}
+.head h1::after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:28%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.58),transparent);transform:skewX(-18deg);animation:titleShimmer 4.8s ease-in-out infinite;pointer-events:none}
+@keyframes titleShimmer{0%,68%{left:-45%;opacity:0}72%{opacity:.75}88%{left:120%;opacity:.4}100%{left:120%;opacity:0}}
+@media (prefers-reduced-motion:reduce){.head h1::after{animation:none}.kpi,.dataBtn{transition:none!important}}
+
+/* Reference-inspired navy/ice dashboard theme */
+body{background:linear-gradient(180deg,#07152f 0%,#0b1d3d 48%,#10284b 100%)!important;color:#eaf3ff!important}
+.wrap{max-width:1250px}
+.head h1{color:#f8fbff!important;text-shadow:0 0 10px rgba(39,209,255,.22),0 0 24px rgba(78,109,255,.12)}
+.panel{background:#eaf0fa!important;border:1px solid #b7c7df!important;box-shadow:0 8px 24px rgba(0,0,0,.25)!important}
+.field label{color:#1a315b!important}
+.field input,.field select{background:#fff!important;color:#203057!important;border:1px solid #b9c7de!important;box-shadow:inset 0 1px 2px rgba(10,30,70,.05)!important}
+.field input::placeholder{color:#8b98ad!important}
+.field input:focus,.field select:focus{outline:2px solid #26c9ff!important;border-color:#4b7cff!important;box-shadow:0 0 0 3px rgba(38,201,255,.12)!important}
+.dataBtn{background:linear-gradient(135deg,#263bff,#17c7f4)!important;color:#fff!important;border:1px solid #64e1ff!important;box-shadow:0 0 10px #2f6cffaa,0 0 22px #20d9ff55!important}
+.dataBtn:hover{background:linear-gradient(135deg,#3e4fff,#28d9ff)!important;box-shadow:0 0 12px #5b6dffff,0 0 28px #20d9ff99!important;transform:translateY(-2px)}
+.kpi{border-radius:14px!important}
+.kpi-total{background:#dff5e8!important;border-color:#9bd4b0!important}.kpi-total .lbl,.kpi-total .num{color:#155d3d!important}
+.kpi-knorr{background:#fde4ec!important;border-color:#f2a8bd!important}.kpi-knorr .lbl,.kpi-knorr .num{color:#a01e4b!important}
+.kpi-under{background:#e4edff!important;border-color:#9db8ed!important}.kpi-under .lbl,.kpi-under .num{color:#294f9b!important}
+.kpi-money{background:#eee5fa!important;border-color:#c2a8df!important}.kpi-money .lbl,.kpi-money .num{color:#65418a!important}
+.tablebox{background:#f4f7fc!important;border:1px solid #b8c8df!important;box-shadow:0 8px 24px rgba(0,0,0,.25)!important}
+.tabletitle{background:#e9eff9!important;color:#132b55!important;border-bottom:1px solid #c5d1e4!important}
+table{background:#f7f9fd!important}th{background:#dbe5f4!important;color:#18335f!important;border-bottom:1px solid #b8c8df!important}td{background:#f7f9fd!important;color:#20365b!important;border-bottom:1px solid #d5deeb!important}tbody tr:nth-child(even) td{background:#edf3fa!important}tbody tr:hover td{background:#e1ecfa!important}
+.empty{color:#66758d!important}
+@media(max-width:800px){.grid,.uploads,.kpis{grid-template-columns:1fr 1fr}}@media(max-width:520px){.grid,.uploads,.kpis{grid-template-columns:1fr}.wrap{padding:12px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="head"><div><h1>HCME Sales Coverage Dashboard</h1><p>Tracking PJP, bao phủ Knorr và doanh số cần bán theo cửa hàng</p></div></div>
+  <div class="head"><div><h1>Sales Tracking Dashboard</h1></div><button type="button" id="dataBtn" class="dataBtn">Xử lý dữ liệu</button></div>
   <div class="panel">
     <div class="grid">
       <div class="field"><label>Thứ bán</label><select id="dayFilter"><option value="">Tất cả thứ bán</option><option>Thứ 2</option><option>Thứ 3</option><option>Thứ 4</option><option>Thứ 5</option><option>Thứ 6</option><option>Thứ 7</option></select></div>
@@ -33,10 +135,10 @@
     <div class="note">Dashboard tự nhận diện các tên cột phổ biến như Code CH/Outlet Code, Tên CH/Outlet Name, Salesman, Thứ bán/Ngày, Sales/Doanh số và Amount Needed/Số tiền cần bán. Nếu file dùng tiêu đề khác, hãy đổi tiêu đề cột về các tên này.</div>
   </div>
   <div class="kpis">
-    <div class="kpi"><div class="lbl">Tổng CH theo PJP</div><div id="kTotal" class="num">0</div></div>
-    <div class="kpi"><div class="lbl">CH chưa đạt Knorr</div><div id="kMissing" class="num red">0</div></div>
-    <div class="kpi"><div class="lbl">CH còn thiếu doanh số</div><div id="kNeed" class="num amber">0</div></div>
-    <div class="kpi"><div class="lbl">Tổng số tiền cần bán</div><div id="kMoney" class="num green">0 ₫</div></div>
+    <div class="kpi kpi-total"><div class="lbl">Tổng CH</div><div id="kTotal" class="num">0</div></div>
+    <div class="kpi kpi-knorr"><div class="lbl">CH chưa đạt Knorr</div><div id="kMissing" class="num red">0</div></div>
+    <div class="kpi kpi-under"><div class="lbl">CH dưới 1tr</div><div id="kNeed" class="num amber">0</div></div>
+    <div class="kpi kpi-money"><div class="lbl">Tổng số tiền cần bán</div><div id="kMoney" class="num green">0 ₫</div></div>
   </div>
   <div class="tablebox"><div class="tabletitle">Chi tiết cửa hàng</div><table><thead><tr><th>Salesman</th><th>Code CH</th><th>Tên CH</th><th>Knorr</th><th>Số tiền cần bán</th></tr></thead><tbody id="body"><tr><td colspan="5" class="empty">Tải file PJP để bắt đầu.</td></tr></tbody></table></div>
 </div>
@@ -58,6 +160,22 @@ function dateText(v){if(!v)return '';if(typeof v==='number'&&window.XLSX){const 
 async function readFile(file){const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});let out=[];wb.SheetNames.forEach(n=>out.push(...XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:''})));return out}
 async function bindFile(inputId,key,statusId){document.getElementById(inputId).addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{data[key]=await readFile(f);document.getElementById(statusId).textContent=`Đã tải: ${f.name} (${data[key].length} dòng)`;refresh()}catch(err){document.getElementById(statusId).textContent='Không đọc được file';console.error(err)}})}
 bindFile('pFile','pjp','pStatus');bindFile('kFile','knorr','kStatus');bindFile('sFile','sales','sStatus');
+const dataBtn=document.getElementById('dataBtn');
+dataBtn.addEventListener('click',()=>{
+  const uploads=document.querySelector('.uploads');
+  if(getComputedStyle(uploads).display==='none'){
+    uploads.style.display='grid';
+    dataBtn.textContent='Xử lý dữ liệu';
+    return;
+  }
+  if(!document.getElementById('pFile').files[0] || !document.getElementById('kFile').files[0] || !document.getElementById('sFile').files[0]){
+    alert('Vui lòng chọn đủ 3 file: PJP, Bao phủ Knorr và CH dưới 1 triệu.');
+    return;
+  }
+  refresh();
+  uploads.style.display='none';
+  dataBtn.textContent='Chọn file mới';
+});
 ['dayFilter','salesFilter','searchBox','statusFilter'].forEach(id=>document.getElementById(id).addEventListener(id==='searchBox'?'input':'change',refresh));
 function refresh(){
  const sf=document.getElementById('salesFilter');const current=sf.value;const salesmen=[...new Set(data.pjp.map(r=>String(val(r,'salesman')).trim()).filter(Boolean))].sort();sf.innerHTML='<option value="">Tất cả Salesman</option>'+salesmen.map(x=>`<option${x===current?' selected':''}>${esc(x)}</option>`).join('');
