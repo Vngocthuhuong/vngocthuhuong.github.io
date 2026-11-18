@@ -11,16 +11,16 @@
   <title>Sales Dashboard</title>
 
   <!-- Thư viện đọc file Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <style>
     :root {
-      --primary: #6d28d9;
-      --primary-dark: #3b0764;
-      --primary-light: #ede9fe;
-
-      --green: #059669;
-      --green-light: #d1fae5;
+      --primary: #7200e8;
+      --primary-light: #f3e8ff;
+      --background: #f5f7fb;
+      --text: #172033;
+      --muted: #667085;
+      --border: #e4e7ec;
 
       --red: #dc2626;
       --red-light: #fee2e2;
@@ -28,28 +28,24 @@
       --orange: #d97706;
       --orange-light: #fef3c7;
 
-      --blue: #2563eb;
-      --blue-light: #dbeafe;
+      --green: #059669;
+      --green-light: #d1fae5;
 
-      --text: #172033;
-      --muted: #667085;
-      --border: #e4e7ec;
-      --background: #f5f7fb;
       --white: #ffffff;
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
       min-width: 320px;
       min-height: 100vh;
+      margin: 0;
+
       font-family: Arial, Helvetica, sans-serif;
-      background: var(--background);
       color: var(--text);
+      background: var(--background);
     }
 
     button,
@@ -62,109 +58,71 @@
       cursor: pointer;
     }
 
-    .app {
-      min-height: 100vh;
-    }
+    /* HEADER */
 
-    /* =========================
-       HEADER
-    ========================= */
+    header {
+      padding: 28px;
 
-    .header {
-      padding: 28px 32px;
       color: white;
       background: linear-gradient(
-        135deg,
-        #111827 0%,
-        #312e81 55%,
-        #6d28d9 100%
+        120deg,
+        #14152f,
+        #312e81,
+        #7200e8
       );
     }
 
-    .header-inner {
-      width: 100%;
-      max-width: 1500px;
-      margin: 0 auto;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .header h1 {
-      font-size: 34px;
-      line-height: 1.15;
-      margin-bottom: 8px;
-    }
-
-    .header-description {
-      font-size: 14px;
-      color: #ddd6fe;
-    }
-
-    .date-badge {
-      padding: 12px 18px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 14px;
-
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(8px);
-
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    /* =========================
-       CONTAINER
-    ========================= */
-
+    .header-inner,
     .container {
       width: 100%;
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 28px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+    }
+
+    header p {
+      margin: 0;
+      color: #e9d5ff;
+      font-size: 14px;
+    }
+
+    /* GENERAL */
+
+    .container {
+      padding: 24px;
     }
 
     .card {
-      background: var(--white);
-      border: 1px solid rgba(228, 231, 236, 0.7);
+      margin-bottom: 22px;
+      padding: 22px;
+
+      border: 1px solid rgba(228, 231, 236, 0.8);
       border-radius: 18px;
+
+      background: var(--white);
 
       box-shadow:
         0 8px 24px rgba(16, 24, 40, 0.05);
     }
 
-    .section-title {
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 6px;
+    h2 {
+      margin: 0 0 8px;
+      font-size: 19px;
     }
 
-    .section-description {
+    .description {
+      margin: 0 0 18px;
+
       color: var(--muted);
       font-size: 13px;
       line-height: 1.5;
     }
 
-    /* =========================
-       UPLOAD FILE
-    ========================= */
-
-    .upload-card {
-      padding: 22px;
-      margin-bottom: 22px;
-    }
-
-    .upload-heading {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
+    /* UPLOAD */
 
     .upload-grid {
       display: grid;
@@ -173,19 +131,18 @@
     }
 
     .upload-box {
-      position: relative;
-
-      min-height: 148px;
+      min-height: 155px;
       padding: 18px;
-
-      border: 2px dashed #d8b4fe;
-      border-radius: 14px;
-      background: #faf7ff;
 
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       gap: 12px;
+      justify-content: space-between;
+
+      border: 2px dashed #d8b4fe;
+      border-radius: 14px;
+
+      background: #fcf8ff;
     }
 
     .upload-box.loaded {
@@ -193,677 +150,10 @@
       background: #ecfdf5;
     }
 
-    .upload-title {
-      font-size: 14px;
-      font-weight: 800;
+    .upload-box h3 {
+      margin: 0 0 7px;
+      font-size: 15px;
     }
 
     .upload-help {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .file-input {
-      width: 100%;
-      padding: 9px;
-
-      border: 1px solid #d0d5dd;
-      border-radius: 9px;
-      background: white;
-
-      font-size: 12px;
-    }
-
-    .file-status {
-      min-height: 18px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .file-status.success {
-      color: var(--green);
-    }
-
-    .file-status.error {
-      color: var(--red);
-    }
-
-    .upload-actions {
-      margin-top: 16px;
-
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      min-height: 42px;
-      padding: 10px 17px;
-
-      border: none;
-      border-radius: 10px;
-
-      font-weight: 800;
-      transition: 0.2s;
-    }
-
-    .btn-primary {
-      color: white;
-      background: var(--primary);
-    }
-
-    .btn-primary:hover {
-      background: #5b21b6;
-    }
-
-    .btn-secondary {
-      color: #344054;
-      background: #f2f4f7;
-    }
-
-    .btn-secondary:hover {
-      background: #e4e7ec;
-    }
-
-    .btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-
-    .global-status {
-      flex: 1;
-      min-width: 220px;
-
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .global-status.success {
-      color: var(--green);
-      font-weight: 700;
-    }
-
-    .global-status.error {
-      color: var(--red);
-      font-weight: 700;
-    }
-
-    /* =========================
-       FILTER
-    ========================= */
-
-    .filter-card {
-      padding: 22px;
-      margin-bottom: 22px;
-    }
-
-    .filter-header {
-      margin-bottom: 16px;
-    }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns:
-        minmax(160px, 0.75fr)
-        minmax(190px, 1fr)
-        minmax(240px, 1.5fr)
-        auto;
-      gap: 14px;
-      align-items: end;
-    }
-
-    .field {
-      min-width: 0;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 7px;
-
-      color: #344054;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .field input,
-    .field select {
-      width: 100%;
-      min-height: 44px;
-      padding: 10px 12px;
-
-      border: 1px solid #d0d5dd;
-      border-radius: 10px;
-      outline: none;
-
-      background: white;
-      color: var(--text);
-    }
-
-    .field input:focus,
-    .field select:focus {
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
-    }
-
-    .weekday-text {
-      min-height: 18px;
-      margin-top: 6px;
-
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .filter-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* =========================
-       KPI
-    ========================= */
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-bottom: 22px;
-    }
-
-    .kpi-card {
-      position: relative;
-      overflow: hidden;
-      min-height: 158px;
-      padding: 22px;
-    }
-
-    .kpi-card::after {
-      content: "";
-      position: absolute;
-      right: -26px;
-      top: -28px;
-
-      width: 105px;
-      height: 105px;
-      border-radius: 50%;
-
-      background: rgba(109, 40, 217, 0.06);
-    }
-
-    .kpi-label {
-      position: relative;
-      z-index: 1;
-
-      margin-bottom: 15px;
-
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .kpi-value {
-      position: relative;
-      z-index: 1;
-
-      margin-bottom: 8px;
-
-      font-size: 32px;
-      line-height: 1.1;
-      font-weight: 900;
-    }
-
-    .kpi-note {
-      position: relative;
-      z-index: 1;
-
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .purple {
-      color: var(--primary);
-    }
-
-    .red {
-      color: var(--red);
-    }
-
-    .orange {
-      color: var(--orange);
-    }
-
-    .green {
-      color: var(--green);
-    }
-
-    /* =========================
-       SUMMARY
-    ========================= */
-
-    .summary-card {
-      padding: 18px 22px;
-      margin-bottom: 22px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    .summary-text {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .summary-text strong {
-      color: var(--text);
-    }
-
-    .legend {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .legend-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-    }
-
-    /* =========================
-       TABLE
-    ========================= */
-
-    .table-card {
-      overflow: hidden;
-      margin-bottom: 22px;
-    }
-
-    .table-heading {
-      padding: 22px;
-
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap;
-
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-count {
-      padding: 7px 11px;
-      border-radius: 50px;
-
-      color: #5b21b6;
-      background: var(--primary-light);
-
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      min-width: 950px;
-      border-collapse: collapse;
-    }
-
-    th {
-      padding: 14px 16px;
-
-      background: #f9fafb;
-      color: #475467;
-
-      font-size: 11px;
-      font-weight: 900;
-      text-align: left;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 15px 16px;
-
-      border-top: 1px solid #eef0f3;
-
-      font-size: 13px;
-      vertical-align: middle;
-    }
-
-    tbody tr:hover {
-      background: #faf7ff;
-    }
-
-    .store-code {
-      color: var(--primary);
-      font-weight: 800;
-    }
-
-    .store-name {
-      max-width: 300px;
-      font-weight: 700;
-    }
-
-    .money {
-      color: var(--orange);
-      font-weight: 900;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-
-      padding: 6px 10px;
-      border-radius: 50px;
-
-      font-size: 11px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .status-covered {
-      color: #047857;
-      background: var(--green-light);
-    }
-
-    .status-not-covered {
-      color: #b91c1c;
-      background: var(--red-light);
-    }
-
-    .status-unknown {
-      color: #475467;
-      background: #f2f4f7;
-    }
-
-    .empty-state {
-      padding: 56px 20px;
-      text-align: center;
-    }
-
-    .empty-icon {
-      width: 58px;
-      height: 58px;
-      margin: 0 auto 14px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 16px;
-      background: var(--primary-light);
-
-      color: var(--primary);
-      font-size: 28px;
-    }
-
-    .empty-title {
-      margin-bottom: 7px;
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .empty-description {
-      max-width: 540px;
-      margin: 0 auto;
-
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .footer {
-      padding: 18px 20px 30px;
-
-      color: #98a2b3;
-      text-align: center;
-      font-size: 11px;
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media (max-width: 1100px) {
-      .upload-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .filter-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 650px) {
-      .header {
-        padding: 24px 18px;
-      }
-
-      .header h1 {
-        font-size: 28px;
-      }
-
-      .container {
-        padding: 16px;
-      }
-
-      .filter-grid,
-      .kpi-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .filter-actions {
-        width: 100%;
-      }
-
-      .filter-actions .btn {
-        flex: 1;
-      }
-
-      .kpi-card {
-        min-height: 135px;
-      }
-
-      .summary-card {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="app">
-
-    <!-- HEADER -->
-    <header class="header">
-      <div class="header-inner">
-
-        <div>
-          <h1>Sales Dashboard</h1>
-
-          <div class="header-description">
-            Tracking PJP, bao phủ Knorr và số tiền cần bán
-          </div>
-        </div>
-
-        <div class="date-badge" id="headerDate">
-          Chưa chọn ngày
-        </div>
-
-      </div>
-    </header>
-
-
-    <main class="container">
-
-      <!-- UPLOAD FILE -->
-      <section class="card upload-card">
-
-        <div class="upload-heading">
-
-          <div>
-            <div class="section-title">
-              Nạp dữ liệu Excel
-            </div>
-
-            <div class="section-description">
-              Chọn đủ 3 file Excel rồi bấm “Xử lý dữ liệu”.
-              Dashboard không tải dữ liệu lên máy chủ.
-            </div>
-          </div>
-
-        </div>
-
-
-        <div class="upload-grid">
-
-          <!-- PJP -->
-          <div class="upload-box" id="pJPBox">
-
-            <div>
-              <div class="upload-title">
-                1. File PJP / danh sách cửa hàng
-              </div>
-
-              <div class="upload-help">
-                File: export20261118104118.xlsx
-              </div>
-            </div>
-
-            <input
-              class="file-input"
-              type="file"
-              id="pJPFile"
-              accept=".xlsx,.xls,.csv"
-            >
-
-            <div class="file-status" id="pJPStatus">
-              Chưa chọn file
-            </div>
-
-          </div>
-
-
-          <!-- KNORR -->
-          <div class="upload-box" id="knorrBox">
-
-            <div>
-              <div class="upload-title">
-                2. File bao phủ Knorr
-              </div>
-
-              <div class="upload-help">
-                File: BAO PHỦ KNORR.xlsx
-              </div>
-            </div>
-
-            <input
-              class="file-input"
-              type="file"
-              id="knorrFile"
-              accept=".xlsx,.xls,.csv"
-            >
-
-            <div class="file-status" id="knorrStatus">
-              Chưa chọn file
-            </div>
-
-          </div>
-
-
-          <!-- SALES GAP -->
-          <div class="upload-box" id="salesGapBox">
-
-            <div>
-              <div class="upload-title">
-                3. File CH dưới mức doanh số
-              </div>
-
-              <div class="upload-help">
-                File: CH DƯỚI 1TR.xlsx
-              </div>
-            </div>
-
-            <input
-              class="file-input"
-              type="file"
-              id="salesGapFile"
-              accept=".xlsx,.xls,.csv"
-            >
-
-            <div class="file-status" id="salesGapStatus">
-              Chưa chọn file
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="upload-actions">
-
-          <button
-            type="button"
-            class="btn btn-primary"
-            id="processButton"
-          >
-            Xử lý dữ liệu
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-secondary"
-            id="clearFilesButton"
-          >
-            Xóa dữ liệu
-          </button>
-
-          <div
-            class="global-status"
-            id="globalStatus"
-            aria-live="polite"
-          >
-            Vui lòng chọn đủ 3 file.
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- FILTER -->
-      <section class="card filter-card">
-
-        <div class="filter-header
+      color: var
